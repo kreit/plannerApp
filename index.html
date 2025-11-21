@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Favorite Planner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">GreenDream Planner</div>
+            <div class="header-controls">
+                <div class="user-profile" id="userProfile">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <span class="user-name" id="userName"></span>
+                    <button class="btn btn-secondary" id="logoutBtn">Sign Out ✌️</button>
+                </div>
+                <button class="btn btn-secondary" id="loginBtn">Let Me In 🚪</button>
+                <button class="btn btn-primary" id="registerBtn">Join the Fun 🎉</button>
+                <button class="btn btn-secondary" id="themeToggle">🌙 Dark Mode</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Authentication Modal -->
+    <div class="auth-section" id="authModal">
+        <div class="auth-form">
+            <h2 id="authTitle">👋 Hey There, Productive Human!</h2>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="authEmail">Email</label>
+                    <input type="email" id="authEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="authPassword">Password</label>
+                    <input type="password" id="authPassword" required>
+                </div>
+                <div class="form-group" id="nameGroup" style="display: none;">
+                    <label for="authName">Full Name</label>
+                    <input type="text" id="authName">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">Let's Go! 🚀</button>
+                <button type="button" class="btn btn-secondary" id="closeAuthModal" style="width: 100%;">Maybe Later 👋</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <h1>Welcome to Your Productivity Hub</h1>
+            <div class="quote-container">
+                <p class="quote-text" id="quoteText">"Loading quote..."</p>
+                <p class="quote-author" id="quoteAuthor"></p>
+                <button class="btn btn-secondary mt-1" id="newQuoteBtn">Inspire Me ✨</button>
+            </div>
+        </section>
+
+
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Task Manager Card -->
+            <div class="card">
+                <h3>📋 Dreams in Progress</h3>
+                <div class="task-input-group">
+                    <input type="text" class="task-input" id="taskInput" placeholder="What's your next dream?">
+                    <button class="btn btn-primary" id="addTaskBtn">Add Dream ✨</button>
+                </div>
+                <ul class="task-list" id="taskList"></ul>
+            </div>
+
+            <!-- Calendar Card -->
+            <div class="card">
+                <h3>📅 Your Personal Time Machine</h3>
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <h4 id="currentMonth"></h4>
+                        <div class="calendar-nav">
+                            <button id="prevMonth">←</button>
+                            <button id="todayBtn">Today</button>
+                            <button id="nextMonth">→</button>
+                        </div>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div class="weekday">Sun</div>
+                        <div class="weekday">Mon</div>
+                        <div class="weekday">Tue</div>
+                        <div class="weekday">Wed</div>
+                        <div class="weekday">Thu</div>
+                        <div class="weekday">Fri</div>
+                        <div class="weekday">Sat</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays"></div>
+                </div>
+
+                <!-- Event Form -->
+                <div class="event-form" id="eventForm">
+                    <h4>✨ Schedule Some Magic</h4>
+                    <div class="form-group">
+                        <label>Event Title</label>
+                        <input type="text" class="form-control" id="eventTitle" placeholder="What's happening?">
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" class="form-control" id="eventDate">
+                    </div>
+                    <button class="btn btn-primary" id="addEventBtn">Lock It In 🎯</button>
+                    <button class="btn btn-secondary" id="cancelEventBtn">Not Now 🤷</button>
+                </div>
+
+                <!-- Event List -->
+                <div class="event-list" id="eventList"></div>
+            </div>
+        </div>
+
+        <!-- Theme Customizer -->
+        <section class="theme-customizer">
+            <h3>🎨 Paint Your Own Vibe</h3>
+            <div class="theme-options">
+                <button class="theme-preset active" data-theme="default">Default</button>
+            <div class="custom-colors" id="customColorPickers">
+                <button class="theme-preset" data-theme="sunset">Sunset Orange</button>
+                <button class="theme-preset" data-theme="forest">Forest Green</button>
+                <button class="theme-preset" data-theme="purple">Purple Dream</button>
+                <button class="theme-preset" data-theme="custom">Custom</button>
+            </div>
+            <div class="custom-colors" id="customColorPickers" style="display: none;">
+                <div class="color-picker-group">
+                    <label>Primary Color</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="primaryColorPicker" value="#2ecc71">
+                        <input type="text" id="primaryColorText" value="#2ecc71">
+                    </div>
+                </div>
+                <div class="color-picker-group">
+                    <label>Background Color</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="bgColorPicker" value="#f8f9fa">
+                        <input type="text" id="bgColorText" value="#f8f9fa">
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-1" id="applyCustomTheme">Make It Mine 🎨</button>
+            </div>
+        </section>
+        </div>
+    </div>
+
+    <!-- External JavaScript File -->
+    <script src="app.js"></script>
+</body>
+</html>
