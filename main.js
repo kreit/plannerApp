@@ -1,31 +1,3 @@
-// ============================================
-// API CONFIGURATION
-// ============================================
-
-// IMPORTANT: Replace these with your own API keys!
-// Get free API keys from:
-// - OpenWeatherMap: https://openweathermap.org/api
-// - Quotable API: No key needed (free public API)
-
-
-
-// ============================================
-// APPLICATION STATE MANAGEMENT
-// ============================================
-
-let appState = {
-    currentUser: null,
-    users: [],
-    tasks: [],
-    events: [],
-    currentTheme: 'light',
-    currentDate: new Date(),
-    selectedDate: null
-};
-
-// ============================================
-// INITIALIZATION
-// ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
     loadStateFromStorage();
