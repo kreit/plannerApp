@@ -1,4 +1,32 @@
 
+// ============================================
+// API CONFIGURATION
+// ============================================
+
+// IMPORTANT: Replace these with your own API keys!
+// Get free API keys from:
+// - OpenWeatherMap: https://openweathermap.org/api
+// - Quotable API: No key needed (free public API)
+
+const API_KEYS = {
+    WEATHER: '8dee0842d9eb5a967b4ad17482035599'
+};
+
+// ============================================
+// APPLICATION STATE MANAGEMENT
+// ============================================
+
+let appState = {
+    currentUser: null,
+    users: [],
+    tasks: [],
+    events: [],
+    isDarkMode: false,
+    currentTheme: 'default',
+    currentDate: new Date(),
+    selectedDate: null
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     loadStateFromStorage();
     initializeEventListeners();
@@ -14,11 +42,79 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 
 function loadStateFromStorage() {
-    console.log('Application state loaded');
+    const stored = localStorage.getItem('plannerAppState');
+    if (stored) {
+        try {
+            const data = JSON.parse(stored);
+            appState.currentUser = data.currentUser || null;
+            appState.users = data.users || [];
+            appState.tasks = data.tasks || [];
+            appState.events = data.events || [];
+            appState.isDarkMode = data.isDarkMode || false;
+            appState.currentTheme = data.currentTheme || 'default';
+            appState.customColors = data.customColors || null;
+
+            // Restore dark mode
+            if (appState.isDarkMode) {
+                document.body.setAttribute('data-theme', 'dark');
+                const toggle = document.getElementById('themeToggle');
+                if (toggle) toggle.textContent = '☀️ Light Mode';
+            }
+
+            // Restore custom colors first if present
+            if (appState.currentTheme === 'custom' && appState.customColors) {
+                // Apply saved custom colors to CSS variables
+                const root = document.documentElement;
+                root.style.setProperty('--primary-color', appState.customColors.primary);
+                root.style.setProperty('--secondary-color', appState.customColors.secondary || adjustBrightness(appState.customColors.primary, -20));
+                root.style.setProperty('--background-color', appState.customColors.background);
+                root.style.setProperty('--text-color', appState.customColors.text || getComputedStyle(root).getPropertyValue('--text-color'));
+                root.style.setProperty('--surface-color', appState.customColors.surface || getComputedStyle(root).getPropertyValue('--surface-color'));
+                // Update pickers UI if present
+                try {
+                    document.getElementById('primaryColorPicker').value = appState.customColors.primary;
+                    document.getElementById('primaryColorText').value = appState.customColors.primary;
+                    document.getElementById('bgColorPicker').value = appState.customColors.background;
+                    document.getElementById('bgColorText').value = appState.customColors.background;
+                    if (appState.customColors.text) {
+                        document.getElementById('textColorPicker').value = appState.customColors.text;
+                        document.getElementById('textColorText').value = appState.customColors.text;
+                    }
+                } catch (e) {}
+                // Ensure header reflects custom colors on load
+                updateHeaderBackground();
+            }
+
+            // Restore theme preset if not custom and not default
+            if (appState.currentTheme && appState.currentTheme !== 'default' && appState.currentTheme !== 'custom') {
+                applyThemePreset(appState.currentTheme);
+            }
+            
+            console.log('Application state loaded from storage');
+        } catch (error) {
+            console.error('Error loading state from storage:', error);
+            console.log('Starting with default state');
+        }
+    } else {
+        console.log('Application state initialized (no previous data)');
+    }
 }
 
 function saveStateToStorage() {
-    console.log('Application state updated');
+    try {
+        const stateToSave = {
+            currentUser: appState.currentUser,
+            users: appState.users,
+            tasks: appState.tasks,
+            events: appState.events,
+            isDarkMode: appState.isDarkMode,
+            currentTheme: appState.currentTheme
+        };
+        localStorage.setItem('plannerAppState', JSON.stringify(stateToSave));
+        console.log('Application state saved to storage');
+    } catch (error) {
+        console.error('Error saving state to storage:', error);
+    }
 }
 
 // ============================================
@@ -67,6 +163,12 @@ function initializeEventListeners() {
 
     // Quote events
     document.getElementById('newQuoteBtn').addEventListener('click', displayRandomQuote);
+
+    // Weather events
+    document.getElementById('getWeatherBtn').addEventListener('click', getWeather);
+    document.getElementById('cityInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') getWeather();
+    });
 
     // Close modal when clicking outside
     document.getElementById('authModal').addEventListener('click', function(e) {
@@ -179,12 +281,16 @@ function toggleTheme() {
     if (body.getAttribute('data-theme') === 'dark') {
         body.removeAttribute('data-theme');
         themeToggle.textContent = '🌙 Dark Mode';
-        appState.currentTheme = 'light';
+        appState.isDarkMode = false;
     } else {
         body.setAttribute('data-theme', 'dark');
         themeToggle.textContent = '☀️ Light Mode';
-        appState.currentTheme = 'dark';
+        appState.isDarkMode = true;
     }
+
+    // Re-apply the currently selected theme so the CSS variables switch to the
+    // correct light/dark variant immediately when toggling modes.
+    if (appState.currentTheme) applyThemePreset(appState.currentTheme);
 
     saveStateToStorage();
 }
@@ -193,6 +299,7 @@ function applyThemePreset(themeName) {
     const root = document.documentElement;
     const customPickers = document.getElementById('customColorPickers');
 
+    // Update active button state
     document.querySelectorAll('.theme-preset').forEach(btn => {
         btn.classList.remove('active');
         if (btn.getAttribute('data-theme') === themeName) {
@@ -200,58 +307,144 @@ function applyThemePreset(themeName) {
         }
     });
 
+    // Show/hide custom color pickers
     if (themeName === 'custom') {
-        customPickers.style.display = 'grid';
+        if (customPickers) customPickers.style.display = 'grid';
+        // If we have saved custom colors, reapply them
+        if (appState.customColors) {
+            root.style.setProperty('--primary-color', appState.customColors.primary);
+            root.style.setProperty('--secondary-color', appState.customColors.secondary || adjustBrightness(appState.customColors.primary, -20));
+            root.style.setProperty('--background-color', appState.customColors.background);
+            root.style.setProperty('--text-color', appState.customColors.text || getComputedStyle(root).getPropertyValue('--text-color'));
+            root.style.setProperty('--surface-color', appState.customColors.surface || getComputedStyle(root).getPropertyValue('--surface-color'));
+        }
+        // Ensure header and other UI reflect these variables immediately
+        updateHeaderBackground();
         return;
-    } else {
-        customPickers.style.display = 'none';
     }
+
+    // Hide custom pickers and apply preset theme
+    if (customPickers) customPickers.style.display = 'none';
 
     const themes = {
         default: {
-            primary: '#2ecc71',
-            secondary: '#27ae60',
-            background: '#f8f9fa',
-            surface: '#ffffff',
-            text: '#2c3e50'
+            light: {
+                primary: '#2ecc71',
+                secondary: '#27ae60',
+                background: '#f8f9fa',
+                surface: '#ffffff',
+                text: '#2c3e50'
+            },
+            dark: {
+                primary: '#2ecc71',
+                secondary: '#27ae60',
+                background: '#1a1a2e',
+                surface: '#16213e',
+                text: '#eaeaea'
+            }
         },
         ocean: {
-            primary: '#3498db',
-            secondary: '#2980b9',
-            background: '#ecf0f1',
-            surface: '#ffffff',
-            text: '#2c3e50'
+            light: {
+                primary: '#3498db',
+                secondary: '#2980b9',
+                background: '#ecf0f1',
+                surface: '#ffffff',
+                text: '#2c3e50'
+            },
+            dark: {
+                primary: '#3498db',
+                secondary: '#2980b9',
+                background: '#0d1b2a',
+                surface: '#1a2a42',
+                text: '#e0e0e0'
+            }
         },
         sunset: {
-            primary: '#e67e22',
-            secondary: '#d35400',
-            background: '#fdf6e3',
-            surface: '#ffffff',
-            text: '#2c3e50'
+            light: {
+                primary: '#e67e22',
+                secondary: '#d35400',
+                background: '#fdf6e3',
+                surface: '#ffffff',
+                text: '#2c3e50'
+            },
+            dark: {
+                primary: '#e67e22',
+                secondary: '#d35400',
+                background: '#2c1810',
+                surface: '#3d2415',
+                text: '#f5deb3'
+            }
         },
         forest: {
-            primary: '#27ae60',
-            secondary: '#229954',
-            background: '#e8f5e9',
-            surface: '#ffffff',
-            text: '#1b5e20'
+            light: {
+                primary: '#27ae60',
+                secondary: '#229954',
+                background: '#e8f5e9',
+                surface: '#ffffff',
+                text: '#1b5e20'
+            },
+            dark: {
+                primary: '#27ae60',
+                secondary: '#229954',
+                background: '#1b5e20',
+                surface: '#2d7a3a',
+                text: '#c8e6c9'
+            }
         },
         purple: {
-            primary: '#9b59b6',
-            secondary: '#8e44ad',
-            background: '#f3e5f5',
-            surface: '#ffffff',
-            text: '#4a148c'
+            light: {
+                primary: '#9b59b6',
+                secondary: '#8e44ad',
+                background: '#f3e5f5',
+                surface: '#ffffff',
+                text: '#4a148c'
+            },
+            dark: {
+                primary: '#9b59b6',
+                secondary: '#8e44ad',
+                background: '#2a0845',
+                surface: '#3d1565',
+                text: '#e1bee7'
+            }
         }
     };
 
+    const isDarkMode = document.body.getAttribute('data-theme') === 'dark';
+    const mode = isDarkMode ? 'dark' : 'light';
     const selectedTheme = themes[themeName];
-    if (selectedTheme) {
-        root.style.setProperty('--primary-color', selectedTheme.primary);
-        root.style.setProperty('--secondary-color', selectedTheme.secondary);
-        root.style.setProperty('--background-color', selectedTheme.background);
-        root.style.setProperty('--surface-color', selectedTheme.surface);
-        root.style.setProperty('--text-color', selectedTheme.text);
+    
+    if (selectedTheme && selectedTheme[mode]) {
+        const colors = selectedTheme[mode];
+        root.style.setProperty('--primary-color', colors.primary);
+        root.style.setProperty('--secondary-color', colors.secondary);
+        root.style.setProperty('--background-color', colors.background);
+        root.style.setProperty('--surface-color', colors.surface);
+        root.style.setProperty('--text-color', colors.text);
+        
+        // Save theme preference
+        appState.currentTheme = themeName;
+        appState.isDarkMode = isDarkMode;
+        // Clear any previously saved custom colors since we're on a preset
+        // (keep appState.customColors if you want to preserve)
+        saveStateToStorage();
+        // Update header background to use the newly-applied CSS variables
+        updateHeaderBackground();
+    }
+}
+
+// Update header's inline background using resolved CSS variables to avoid any
+// issues where computed background-image isn't updating in some browsers.
+function updateHeaderBackground() {
+    try {
+        const rootStyles = getComputedStyle(document.documentElement);
+        const p = rootStyles.getPropertyValue('--primary-color').trim() || '#2ecc71';
+        const s = rootStyles.getPropertyValue('--secondary-color').trim() || '#27ae60';
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.background = `linear-gradient(90deg, rgba(0,0,0,0.04), rgba(255,255,255,0.02)), linear-gradient(135deg, ${p}, ${s})`;
+        }
+    } catch (e) {
+        // noop
     }
 }
 
@@ -268,10 +461,38 @@ function applyCustomColors() {
     const root = document.documentElement;
     const primaryColor = document.getElementById('primaryColorPicker').value;
     const bgColor = document.getElementById('bgColorPicker').value;
+    const textColorEl = document.getElementById('textColorPicker');
+    const textColor = textColorEl ? textColorEl.value : null;
 
     root.style.setProperty('--primary-color', primaryColor);
     root.style.setProperty('--secondary-color', adjustBrightness(primaryColor, -20));
     root.style.setProperty('--background-color', bgColor);
+
+    // Adjust surface/text for dark mode so custom colors remain legible
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+        // In dark mode, use a darker surface and light text
+        root.style.setProperty('--surface-color', '#16213e');
+        root.style.setProperty('--text-color', textColor || '#eaeaea');
+    } else {
+        // In light mode, use a light surface and dark text
+        root.style.setProperty('--surface-color', '#ffffff');
+        root.style.setProperty('--text-color', textColor || '#2c3e50');
+    }
+
+    // Save custom theme preference
+    appState.currentTheme = 'custom';
+    appState.customColors = {
+        primary: primaryColor,
+        secondary: adjustBrightness(primaryColor, -20),
+        background: bgColor,
+        text: textColor || null,
+        surface: isDark ? '#16213e' : '#ffffff'
+    };
+    saveStateToStorage();
+
+    // Update header/background to reflect custom colors immediately
+    updateHeaderBackground();
 
     alert('Custom theme applied!');
 }
@@ -531,6 +752,88 @@ async function displayRandomQuote() {
         document.getElementById('quoteText').textContent = `"${randomQuote.text}"`;
         document.getElementById('quoteAuthor').textContent = `- ${randomQuote.author}`;
     }
+}
+
+// ============================================
+// WEATHER API INTEGRATION
+// ============================================
+
+async function getWeather() {
+    const city = document.getElementById('cityInput').value.trim();
+
+    if (!city) {
+        alert('Please enter a city name!');
+        return;
+    }
+
+    if (API_KEYS.WEATHER === 'YOUR_OPENWEATHERMAP_API_KEY_HERE') {
+        alert('Please add your OpenWeatherMap API key in main.js to use the weather feature!\n\nGet a free API key at: https://openweathermap.org/api');
+        return;
+    }
+
+    try {
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${API_KEYS.WEATHER}&units=imperial`;
+        console.log('Requesting weather:', url);
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            // Attempt to read error body for more details
+            let details = '';
+            try {
+                const text = await response.text();
+                // Some APIs return JSON error payloads
+                try {
+                    const json = JSON.parse(text);
+                    details = json.message || JSON.stringify(json);
+                } catch (e) {
+                    details = text;
+                }
+            } catch (e) {
+                details = '(no response body)';
+            }
+
+            throw new Error(`Weather API error: HTTP ${response.status} ${response.statusText} - ${details}`);
+        }
+
+        const data = await response.json();
+        displayWeather(data);
+
+    } catch (error) {
+        console.error('Error fetching weather:', error);
+        // Show detailed message to help debugging
+        alert(`Could not fetch weather data:\n${error.message}`);
+    }
+}
+
+function displayWeather(data) {
+    const weatherDisplay = document.getElementById('weatherDisplay');
+    const weatherIcon = document.getElementById('weatherIcon');
+    const weatherTemp = document.getElementById('weatherTemp');
+    const weatherDesc = document.getElementById('weatherDesc');
+    const weatherCity = document.getElementById('weatherCity');
+
+    const weatherEmojis = {
+        'Clear': '☀️',
+        'Clouds': '☁️',
+        'Rain': '🌧️',
+        'Drizzle': '🌦️',
+        'Thunderstorm': '⛈️',
+        'Snow': '❄️',
+        'Mist': '🌫️',
+        'Fog': '🌫️',
+        'Haze': '🌫️'
+    };
+
+    const condition = data.weather[0].main;
+    const emoji = weatherEmojis[condition] || '🌤️';
+
+    weatherIcon.textContent = emoji;
+    weatherTemp.textContent = `${Math.round(data.main.temp)}°F`;
+    weatherDesc.textContent = data.weather[0].description;
+    weatherCity.textContent = `${data.name}, ${data.sys.country}`;
+
+    weatherDisplay.style.display = 'block';
 }
 
 // ============================================
