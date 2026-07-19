@@ -1,34 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Nunito:wght@400;600;700;800&display=swap');
+
 :root {
-    /* Default Light Theme */
-    --primary-color: #2ecc71;
-    --secondary-color: #27ae60;
-    --background-color: #f8f9fa;
-    --surface-color: #ffffff;
-    --text-color: #2c3e50;
-    --text-secondary: #7f8c8d;
-    --border-color: #e1e8ed;
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --danger-color: #e74c3c;
-    --warning-color: #f39c12;
-    --info-color: #3498db;
-    --success-color: #2ecc71;
+    /* Meadow (Default) — Light */
+    --primary-color: #7c9473;
+    --secondary-color: #5f7856;
+    --background-color: #f6f3ea;
+    --surface-color: #fffdf8;
+    --text-color: #3e3a31;
+    --text-secondary: #8a8375;
+    --border-color: #e4dccb;
+    --shadow: 0 2px 8px rgba(62, 50, 30, 0.1);
+    --shadow-hover: 0 4px 14px rgba(62, 50, 30, 0.16);
+    --danger-color: #c0604a;
+    --warning-color: #d0a24c;
+    --info-color: #6e8fa3;
+    --success-color: #7c9473;
 }
 
 [data-theme="dark"] {
-    --primary-color: #2ecc71;
-    --secondary-color: #27ae60;
-    --background-color: #1a1a2e;
-    --surface-color: #16213e;
-    --text-color: #eaeaea;
-    --text-secondary: #a0a0a0;
-    --border-color: #2c3e50;
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --danger-color: #e74c3c;
-    --warning-color: #f39c12;
-    --info-color: #3498db;
-    --success-color: #2ecc71;
+    /* Meadow — Dark */
+    --primary-color: #9cb08e;
+    --secondary-color: #7c9473;
+    --background-color: #24261f;
+    --surface-color: #2f3227;
+    --text-color: #ede8da;
+    --text-secondary: #a8a392;
+    --border-color: #3a3c30;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.45);
+    --danger-color: #d97b63;
+    --warning-color: #e0b968;
+    --info-color: #8fb0c4;
+    --success-color: #9cb08e;
 }
 
 /* ============================================
@@ -42,11 +45,16 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, .logo {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
 }
 
 /* ============================================

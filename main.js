@@ -1,4 +1,3 @@
-
 // ============================================
 // API CONFIGURATION
 // ============================================
@@ -328,83 +327,88 @@ function applyThemePreset(themeName) {
 
     const themes = {
         default: {
+            // Meadow
             light: {
-                primary: '#2ecc71',
-                secondary: '#27ae60',
-                background: '#f8f9fa',
-                surface: '#ffffff',
-                text: '#2c3e50'
+                primary: '#7c9473',
+                secondary: '#5f7856',
+                background: '#f6f3ea',
+                surface: '#fffdf8',
+                text: '#3e3a31'
             },
             dark: {
-                primary: '#2ecc71',
-                secondary: '#27ae60',
-                background: '#1a1a2e',
-                surface: '#16213e',
-                text: '#eaeaea'
+                primary: '#9cb08e',
+                secondary: '#7c9473',
+                background: '#24261f',
+                surface: '#2f3227',
+                text: '#ede8da'
             }
         },
         ocean: {
+            // Dusty Blue
             light: {
-                primary: '#3498db',
-                secondary: '#2980b9',
-                background: '#ecf0f1',
-                surface: '#ffffff',
-                text: '#2c3e50'
+                primary: '#7c9aae',
+                secondary: '#5f7c8f',
+                background: '#eef2f3',
+                surface: '#fbfcfc',
+                text: '#33424a'
             },
             dark: {
-                primary: '#3498db',
-                secondary: '#2980b9',
-                background: '#0d1b2a',
-                surface: '#1a2a42',
-                text: '#e0e0e0'
+                primary: '#93aec0',
+                secondary: '#7c9aae',
+                background: '#1b2529',
+                surface: '#263339',
+                text: '#d9e3e6'
             }
         },
         sunset: {
+            // Terracotta
             light: {
-                primary: '#e67e22',
-                secondary: '#d35400',
-                background: '#fdf6e3',
-                surface: '#ffffff',
-                text: '#2c3e50'
+                primary: '#c97b5a',
+                secondary: '#a8593b',
+                background: '#faf3ea',
+                surface: '#fffbf6',
+                text: '#4a3428'
             },
             dark: {
-                primary: '#e67e22',
-                secondary: '#d35400',
-                background: '#2c1810',
-                surface: '#3d2415',
-                text: '#f5deb3'
+                primary: '#d99372',
+                secondary: '#c97b5a',
+                background: '#2a1e17',
+                surface: '#372820',
+                text: '#f2e4d8'
             }
         },
         forest: {
+            // Sage
             light: {
-                primary: '#27ae60',
-                secondary: '#229954',
-                background: '#e8f5e9',
-                surface: '#ffffff',
-                text: '#1b5e20'
+                primary: '#4f6f52',
+                secondary: '#3d5741',
+                background: '#eef1e6',
+                surface: '#fafbf6',
+                text: '#2e3b2a'
             },
             dark: {
-                primary: '#27ae60',
-                secondary: '#229954',
-                background: '#1b5e20',
-                surface: '#2d7a3a',
-                text: '#c8e6c9'
+                primary: '#7fa283',
+                secondary: '#4f6f52',
+                background: '#1b231c',
+                surface: '#253027',
+                text: '#dce5d6'
             }
         },
         purple: {
+            // Lavender
             light: {
-                primary: '#9b59b6',
-                secondary: '#8e44ad',
-                background: '#f3e5f5',
-                surface: '#ffffff',
-                text: '#4a148c'
+                primary: '#9c8ab5',
+                secondary: '#7c6b99',
+                background: '#f5f1f8',
+                surface: '#fffdfc',
+                text: '#423a52'
             },
             dark: {
-                primary: '#9b59b6',
-                secondary: '#8e44ad',
-                background: '#2a0845',
-                surface: '#3d1565',
-                text: '#e1bee7'
+                primary: '#b3a3c7',
+                secondary: '#9c8ab5',
+                background: '#241f2c',
+                surface: '#302a3b',
+                text: '#e6deef'
             }
         }
     };
@@ -437,8 +441,8 @@ function applyThemePreset(themeName) {
 function updateHeaderBackground() {
     try {
         const rootStyles = getComputedStyle(document.documentElement);
-        const p = rootStyles.getPropertyValue('--primary-color').trim() || '#2ecc71';
-        const s = rootStyles.getPropertyValue('--secondary-color').trim() || '#27ae60';
+        const p = rootStyles.getPropertyValue('--primary-color').trim() || '#7c9473';
+        const s = rootStyles.getPropertyValue('--secondary-color').trim() || '#5f7856';
         const header = document.querySelector('header');
         if (header) {
             header.style.background = `linear-gradient(90deg, rgba(0,0,0,0.04), rgba(255,255,255,0.02)), linear-gradient(135deg, ${p}, ${s})`;
@@ -471,13 +475,13 @@ function applyCustomColors() {
     // Adjust surface/text for dark mode so custom colors remain legible
     const isDark = document.body.getAttribute('data-theme') === 'dark';
     if (isDark) {
-        // In dark mode, use a darker surface and light text
-        root.style.setProperty('--surface-color', '#16213e');
-        root.style.setProperty('--text-color', textColor || '#eaeaea');
+        // In dark mode, use a darker surface and warm light text
+        root.style.setProperty('--surface-color', '#2f3227');
+        root.style.setProperty('--text-color', textColor || '#ede8da');
     } else {
-        // In light mode, use a light surface and dark text
-        root.style.setProperty('--surface-color', '#ffffff');
-        root.style.setProperty('--text-color', textColor || '#2c3e50');
+        // In light mode, use a soft cream surface and warm dark text
+        root.style.setProperty('--surface-color', '#fffdf8');
+        root.style.setProperty('--text-color', textColor || '#3e3a31');
     }
 
     // Save custom theme preference
@@ -487,7 +491,7 @@ function applyCustomColors() {
         secondary: adjustBrightness(primaryColor, -20),
         background: bgColor,
         text: textColor || null,
-        surface: isDark ? '#16213e' : '#ffffff'
+        surface: isDark ? '#2f3227' : '#fffdf8'
     };
     saveStateToStorage();
 
